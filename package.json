@@ -1,6 +1,7 @@
 {
   "name": "contractor",
   "version": "1.0.0",
+  "repository": "https://github.com/ztoben/contractor",
   "description": "A small time tracking and invoicing system",
   "main": "index.js",
   "scripts": {
