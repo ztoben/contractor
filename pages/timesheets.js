@@ -2,14 +2,14 @@ import React from 'react';
 import {useSelector} from 'react-redux'
 import {useFirestoreConnect, isLoaded, isEmpty} from 'react-redux-firebase'
 import {CircularProgress, Button} from '@material-ui/core';
-import AddProjectModal from '../components/addProjectModal';
+import AddHoursModal from '../components/addHoursModal';
 import Layout from '../components/layout';
 
-export default function Projects() {
+export default function TimeSheets() {
   const [open, setOpen] = React.useState(false);
 
   useFirestoreConnect([
-    {collection: 'projects'}
+    {collection: 'timesheets'}
   ]);
 
   const handleClickOpen = () => {
@@ -20,22 +20,22 @@ export default function Projects() {
     setOpen(false);
   };
 
-  const projects = useSelector(state => state.firestore.ordered.projects);
+  const timesheets = useSelector(state => state.firestore.ordered.timesheets);
 
   return (
     <Layout>
-      <h1>Projects</h1>
-      {!isLoaded(projects) ? <CircularProgress/> : (
+      <h1>Time Sheets</h1>
+      {!isLoaded(timesheets) ? <CircularProgress/> : (
         <>
           <ul>
-            {!isEmpty(projects) && projects.map((project, idx) => <li key={idx}>{project.name}</li>)}
+            {!isEmpty(timesheets) && timesheets.map((sheet, idx) => <li key={idx}>{sheet.date}</li>)}
           </ul>
           <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-            + Add Project
+            + Add Hours
           </Button>
         </>
       )}
-      <AddProjectModal open={open} handleClose={handleClose}/>
+      <AddHoursModal open={open} handleClose={handleClose}/>
     </Layout>
   );
 }
