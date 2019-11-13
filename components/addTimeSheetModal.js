@@ -13,9 +13,9 @@ import {TextField, Select} from 'formik-material-ui';
 import {useSelector} from 'react-redux';
 import * as Yup from 'yup';
 
-function AddHoursModal({open, handleClose, firestore}) {
-  async function addHours(hours, setSubmitting) {
-    await firestore.add('timesheets', hours);
+function AddTimeSheetModal({open, handleClose, firestore}) {
+  async function addTimeSheet(timeSheet, setSubmitting) {
+    await firestore.add('timesheets', timeSheet);
     setSubmitting(false);
     handleClose();
   }
@@ -29,32 +29,30 @@ function AddHoursModal({open, handleClose, firestore}) {
   return (
     <div>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Add Hours</DialogTitle>
+        <DialogTitle id="form-dialog-title">Add Time Sheet</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Make sure to choose a project to add your hours to.
+            Make sure to choose a project to add your time sheet to.
           </DialogContentText>
           <Formik
-            initialValues={{date: '', startTime: '', endTime: '', project: ''}}
+            initialValues={{description: '', startTime: '', endTime: '', project: ''}}
             onSubmit={(values, {setSubmitting}) => {
               setSubmitting(true);
-              return addHours(values, setSubmitting);
+              return addTimeSheet(values, setSubmitting);
             }}
             validationSchema={Yup.object().shape({
-              date: Yup.date().required('Required'),
-              startTime: Yup.string().required('Required'),
-              endTime: Yup.string().required('Required'),
-              project: Yup.string().required('Required')
+              startTime: Yup.date().required('Required'),
+              endTime: Yup.date().required('Required'),
+              project: Yup.string().required('Required'),
+              description: Yup.string()
             })}
           >
             {({isSubmitting}) => (
               <Form>
-                <InputLabel shrink={true} htmlFor="date">Date</InputLabel>
-                <Field type="date" name="date" component={TextField} margin="dense" fullWidth autoFocus/>
                 <InputLabel shrink={true} htmlFor="startTime">Start Time</InputLabel>
-                <Field type="time" name="startTime" component={TextField} margin="dense" fullWidth/>
+                <Field type="datetime-local" name="startTime" component={TextField} margin="dense" fullWidth/>
                 <InputLabel shrink={true} htmlFor="endTime">End Time</InputLabel>
-                <Field type="time" name="endTime" component={TextField} margin="dense" fullWidth/>
+                <Field type="datetime-local" name="endTime" component={TextField} margin="dense" fullWidth/>
                 <InputLabel shrink={true} htmlFor="project">
                   Project
                 </InputLabel>
@@ -74,6 +72,8 @@ function AddHoursModal({open, handleClose, firestore}) {
                     </MenuItem>
                   ))}
                 </Field>
+                <InputLabel shrink={true} htmlFor="description">Description</InputLabel>
+                <Field type="text" name="description" component={TextField} margin="dense" fullWidth/>
                 <DialogActions>
                   <Button onClick={handleClose} color="primary">
                     Cancel
@@ -92,4 +92,4 @@ function AddHoursModal({open, handleClose, firestore}) {
   );
 }
 
-export default withFirestore(AddHoursModal);
+export default withFirestore(AddTimeSheetModal);

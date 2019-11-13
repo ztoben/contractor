@@ -1,7 +1,8 @@
 import React from 'react';
 import Header from './header';
-import {isEmpty} from 'react-redux-firebase';
+import {isEmpty, isLoaded} from 'react-redux-firebase';
 import {useSelector} from 'react-redux';
+import {CircularProgress} from '@material-ui/core';
 
 export default function Layout (props) {
   const auth = useSelector(state => state.firebase.auth);
@@ -25,8 +26,12 @@ export default function Layout (props) {
               flexDirection: 'column'
             }}
           >
-            <img src="/logo.svg" alt="logo" width={300}/>
-            <h1>Please login to start using Contractor.</h1>
+            {!isLoaded(auth) ? <CircularProgress /> : (
+              <>
+                <img src="/logo.svg" alt="logo" width={300}/>
+                <h1>Please login to start using Contractor.</h1>
+              </>
+            )}
           </div>
         ) : props.children}
       </div>
