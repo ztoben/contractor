@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import {useSelector} from 'react-redux'
-import {useFirestoreConnect, isLoaded, isEmpty} from 'react-redux-firebase'
+import {connect, useSelector} from 'react-redux'
+import {useFirestoreConnect, isLoaded, isEmpty, firestoreConnect} from 'react-redux-firebase'
 import {CircularProgress, Button, makeStyles, Checkbox} from '@material-ui/core';
 import {differenceInMinutes, format} from 'date-fns';
 import AddTimeSheetModal from '../components/addTimeSheetModal';
@@ -13,6 +13,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
 import DeleteTimeSheetModal from '../components/deleteTimeSheetModal';
 import {fieldSort} from '../utils/fieldSort';
+import {compose} from 'redux';
 
 function buildTimeSheetsTable(timeSheets, classes, idsToDelete, setIdsToDelete) {
   if (isEmpty(timeSheets)) return (
@@ -67,7 +68,7 @@ function buildTimeSheetsTable(timeSheets, classes, idsToDelete, setIdsToDelete) 
   );
 }
 
-export default function TimeSheets() {
+function TimeSheets({auth}) {
   const useStyles = makeStyles({
     root: {
       width: '100%',
@@ -101,10 +102,6 @@ export default function TimeSheets() {
   const [addTimeSheetOpen, setAddTimeSheetOpen] = useState(false);
   const [deleteTimeSheetOpen, setDeleteTimeSheetOpen] = useState(false);
   const [idsToDelete, setIdsToDelete] = useState([]);
-
-  useFirestoreConnect([
-    {collection: 'timesheets'}
-  ]);
 
   const handleClickOpenAddTimeSheet = () => {
     setAddTimeSheetOpen(true);
@@ -146,7 +143,11 @@ export default function TimeSheets() {
           setIdsToDelete
         )
       }
-      <AddTimeSheetModal open={addTimeSheetOpen} handleClose={handleCloseAddTimeSheet}/>
+      <AddTimeSheetModal
+        open={addTimeSheetOpen}
+        handleClose={handleCloseAddTimeSheet}
+        auth={auth}
+      />
       <DeleteTimeSheetModal
         open={deleteTimeSheetOpen}
         handleClose={handleCloseDeleteTimeSheet}
@@ -156,3 +157,24 @@ export default function TimeSheets() {
     </Layout>
   );
 }
+
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    timeSheets: state.firestore.ordered.timesheets
+  }
+};
+
+export default compose(
+  connect(mapStateToProps),
+  firestoreConnect((props) => {
+    if (!props.auth.uid) return [];
+
+    return [
+      {
+        collection: 'timesheets',
+        where: ['uid', '==', props.auth.uid]
+      }
+    ]
+  })
+)(TimeSheets);

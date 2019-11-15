@@ -7,24 +7,19 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
-import {useFirestoreConnect, withFirestore} from 'react-redux-firebase';
+import {firestoreConnect} from 'react-redux-firebase';
 import {Formik, Form, Field} from 'formik';
 import {TextField, Select} from 'formik-material-ui';
-import {useSelector} from 'react-redux';
+import {connect} from 'react-redux';
 import * as Yup from 'yup';
+import {compose} from 'redux';
 
-function AddTimeSheetModal({open, handleClose, firestore}) {
+function AddTimeSheetModal({open, handleClose, firestore, auth, projects}) {
   async function addTimeSheet(timeSheet, setSubmitting) {
-    await firestore.add('timesheets', timeSheet);
+    await firestore.add('timesheets', {...timeSheet, uid: auth.uid});
     setSubmitting(false);
     handleClose();
   }
-
-  useFirestoreConnect([
-    {collection: 'projects'}
-  ]);
-
-  const projects = useSelector(state => state.firestore.ordered.projects);
 
   return (
     <div>
@@ -92,4 +87,25 @@ function AddTimeSheetModal({open, handleClose, firestore}) {
   );
 }
 
-export default withFirestore(AddTimeSheetModal);
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    projects: state.firestore.ordered.projects,
+    firestore: state.firestore
+  }
+};
+
+export default compose(connect(mapStateToProps),
+  firestoreConnect((props) => {
+    if (!props.auth.uid) return [];
+
+    return [
+      {
+        collection: 'projects',
+        where: [
+          ['uid', '==', props.auth.uid]
+        ]
+      }
+    ]
+  })
+)(AddTimeSheetModal);

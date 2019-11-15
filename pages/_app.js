@@ -4,13 +4,13 @@ import Head from 'next/head';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
-import { ThemeProvider } from '@material-ui/core/styles';
+import {ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from '../theme';
-import { Provider } from 'react-redux';
-import { createStore, combineReducers } from 'redux';
-import { ReactReduxFirebaseProvider, firebaseReducer } from 'react-redux-firebase';
-import { createFirestoreInstance, firestoreReducer } from 'redux-firestore';
+import {Provider} from 'react-redux';
+import {createStore, combineReducers} from 'redux';
+import {ReactReduxFirebaseProvider, firebaseReducer} from 'react-redux-firebase';
+import {createFirestoreInstance, firestoreReducer} from 'redux-firestore';
 import {firebaseConfig} from "../firebaseConfig";
 
 const rrfConfig = {
@@ -44,7 +44,7 @@ export default class Contractor extends App {
   }
 
   render() {
-    const { Component, pageProps } = this.props;
+    const {Component, pageProps} = this.props;
 
     return (
       <Provider store={store}>

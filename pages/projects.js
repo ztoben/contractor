@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import {useSelector} from 'react-redux'
-import {useFirestoreConnect, isLoaded, isEmpty} from 'react-redux-firebase'
+import {connect, useSelector} from 'react-redux'
+import {useFirestoreConnect, isLoaded, isEmpty, firestoreConnect} from 'react-redux-firebase'
 import {makeStyles} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -15,6 +15,7 @@ import DeleteProjectsModal from '../components/deleteProjectsModal';
 import Layout from '../components/layout';
 import {Checkbox} from '@material-ui/core';
 import {fieldSort} from '../utils/fieldSort';
+import {compose} from 'redux';
 
 function buildProjectsTable(projects, classes, idsToDelete, setIdsToDelete) {
   if (isEmpty(projects)) return (
@@ -64,7 +65,7 @@ function buildProjectsTable(projects, classes, idsToDelete, setIdsToDelete) {
   );
 }
 
-export default function Projects() {
+function Projects({auth}) {
   const useStyles = makeStyles({
     root: {
       width: '100%',
@@ -98,10 +99,6 @@ export default function Projects() {
   const [addProjectOpen, setAddProjectOpen] = useState(false);
   const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
   const [idsToDelete, setIdsToDelete] = useState([]);
-
-  useFirestoreConnect([
-    {collection: 'projects'}
-  ]);
 
   const handleClickOpenAddProject = () => {
     setAddProjectOpen(true);
@@ -143,7 +140,13 @@ export default function Projects() {
           setIdsToDelete
         )
       }
-      <AddProjectModal open={addProjectOpen} handleClose={handleCloseAddProject}/>
+      {isLoaded(auth) && (
+        <AddProjectModal
+          open={addProjectOpen}
+          handleClose={handleCloseAddProject}
+          auth={auth}
+        />
+      )}
       <DeleteProjectsModal
         open={deleteProjectOpen}
         handleClose={handleCloseDeleteProject}
@@ -153,3 +156,24 @@ export default function Projects() {
     </Layout>
   );
 }
+
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    projects: state.firestore.ordered.projects
+  }
+};
+
+export default compose(
+  connect(mapStateToProps),
+  firestoreConnect((props) => {
+    if (!props.auth.uid) return [];
+
+    return [
+      {
+        collection: 'projects',
+        where: ['uid', '==', props.auth.uid]
+      }
+    ]
+  })
+)(Projects);

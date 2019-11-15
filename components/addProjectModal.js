@@ -10,9 +10,9 @@ import {Formik, Form, Field} from 'formik';
 import {TextField} from 'formik-material-ui';
 import * as Yup from 'yup';
 
-function AddProjectModal({open, handleClose, firestore}) {
+function AddProjectModal({open, handleClose, firestore, auth}) {
   async function addProject(project, setSubmitting) {
-    await firestore.add('projects', project);
+    await firestore.add('projects', {...project, uid: auth.uid});
     setSubmitting(false);
     handleClose();
   }
